@@ -32,7 +32,7 @@ class LoginHubViewModel: ObservableObject {
     {
         updateUIState = .loading
         
-        userLoginUsecase.onUserLoginPublisher
+        userLoginUsecase.excute(loginType: loginType)
             .sink { [weak self] status in
                 switch status {
                 case .finished:
@@ -44,7 +44,5 @@ class LoginHubViewModel: ObservableObject {
                 self?.updateUIState = .success
             }
             .store(in: &cancellables)
-        
-        userLoginUsecase.excute(loginType: type)
     }
 }

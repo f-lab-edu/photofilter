@@ -7,42 +7,44 @@
 
 import Foundation
 import Combine
+import AuthenticationServices
+import CryptoKit
 
 protocol UserLoginRepositoryProtocol {
-//    var onUserLoginPublisher: AnyPublisher<UserDTO, Error> { get }
-    func userLogin(loginType : LoginType) -> UserDTO?
+    //    var onUserLoginPublisher: AnyPublisher<UserDTO, Error> { get }
+    func userLogin(loginType : LoginType) -> AnyPublisher<User, Error>
 }
 
 class UserLoginRepository : UserLoginRepositoryProtocol {
     
-//    private let onUserLoginSubject = PassthroughSubject<UserDTO, Error>()
-//
-//    var onUserLoginPublisher: AnyPublisher<UserDTO, Error> {
-//        onUserLoginSubject.eraseToAnyPublisher()
-//    }
+    var authManger : AuthManagerProtocol
     
-    func userLogin(loginType: LoginType) -> UserDTO? {
-        
-        if loginType == .apple {
-            return appleLoginProcess()
-        }
-        else if loginType == .google
-        {
-            return googleLoginProcess()
-        }
-        else
-        {
-            return nil
-        }
+    private var cancellables = Set<AnyCancellable>()
+    
+    init(authManager : AuthManagerProtocol)
+    {
+        self.authManger = authManager
     }
     
-    func appleLoginProcess() -> UserDTO? {
-        let dummy = UserDTO(uid: "test", nickname: "test", idToken: "test", accessToken: "test", loginType: "test", pn: "test", regDate: "test")
+    func userLogin(loginType: LoginType) -> AnyPublisher<User, Error> {
+        
+        authManger.signinWithApple()
+        
+        return authManger.onSNSLoginPublisher
+            .map { result in
+                UserDTO(uid: result.uid, nickname: result.nickname, idToken: result.idToken, loginType: result.loginType, pn: "SNS", regDate: Date().toString())
+                    .toEntity()
+            }
+            .eraseToAnyPublisher()
+    }
+    
+    private func appleLoginProcess(result authResult : AuthResult) -> UserDTO? {
+        let dummy = UserDTO(uid: "test", nickname: "test", idToken: "Test", loginType: "test", pn: "test", regDate: "test")
         return dummy
     }
     
-    func googleLoginProcess() -> UserDTO? {
-        let dummy = UserDTO(uid: "test", nickname: "test", idToken: "test", accessToken: "test", loginType: "test", pn: "test", regDate: "test")
+    private func googleLoginProcess() -> UserDTO? {
+        let dummy = UserDTO(uid: "test", nickname: "test", idToken: "Test", loginType: "test", pn: "test", regDate: "test")
         return dummy
     }
 }

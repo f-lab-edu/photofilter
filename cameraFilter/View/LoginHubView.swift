@@ -12,7 +12,7 @@ struct LoginHubView: View {
     
     private var appleLoginButton : some View {
         Button {
-            
+            viewModel.onClickLogin(type: .apple)
         } label: {
             Text("Apple로 로그인하기")
                 .foregroundStyle(.white)
@@ -81,5 +81,5 @@ struct LoginHubView: View {
 }
 
 #Preview {
-    LoginHubView(viewModel: LoginHubViewModel(userLoginUseCase: UserLoginUseCase(repository: UserLoginRepository())))
+    LoginHubView(viewModel: LoginHubViewModel(userLoginUseCase: UserLoginUseCase(repository: UserLoginRepository(authManager: AuthManager()))))
 }

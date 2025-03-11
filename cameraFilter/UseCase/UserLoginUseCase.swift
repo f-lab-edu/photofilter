@@ -9,20 +9,13 @@ import Foundation
 import Combine
 
 protocol UserLoginUseCaseProtocol {
-    var onUserLoginPublisher : AnyPublisher<User, Error> { get }
     func checkUserInvalid()
-    func excute(loginType : LoginType)
+    func excute(loginType : LoginType) -> AnyPublisher<User, Error>
 }
 
 class UserLoginUseCase : UserLoginUseCaseProtocol {
     
     var userLoginRepository : UserLoginRepositoryProtocol
-    
-    private let onUserLoginSubject = PassthroughSubject<User, Error>()
-    
-    var onUserLoginPublisher: AnyPublisher<User, Error> {
-        onUserLoginSubject.eraseToAnyPublisher()
-    }
     
     private var cancellables = Set<AnyCancellable>()
     
@@ -35,14 +28,8 @@ class UserLoginUseCase : UserLoginUseCaseProtocol {
         
     }
     
-    func excute(loginType: LoginType) {
+    func excute(loginType: LoginType) -> AnyPublisher<User, Error> {
         
-        guard let responseDTO = userLoginRepository.userLogin(loginType: loginType) else {
-            return
-        }
-        
-        let userEntity = responseDTO.toEntity()
-        
-        onUserLoginSubject.send(userEntity)
+        return userLoginRepository.userLogin(loginType: loginType)
     }
 }
