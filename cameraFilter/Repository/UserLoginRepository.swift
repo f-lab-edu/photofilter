@@ -7,42 +7,143 @@
 
 import Foundation
 import Combine
+import AuthenticationServices
+import CryptoKit
+import FirebaseCore
+import FirebaseAuth
 
 protocol UserLoginRepositoryProtocol {
-//    var onUserLoginPublisher: AnyPublisher<UserDTO, Error> { get }
-    func userLogin(loginType : LoginType) -> UserDTO?
+    func userLogin(loginType : LoginType, completion : @escaping (Result<UserDTO, LoginError>) -> Void)
 }
 
 class UserLoginRepository : UserLoginRepositoryProtocol {
     
-//    private let onUserLoginSubject = PassthroughSubject<UserDTO, Error>()
-//
-//    var onUserLoginPublisher: AnyPublisher<UserDTO, Error> {
-//        onUserLoginSubject.eraseToAnyPublisher()
-//    }
+    var signinService : SignInProtocol?
     
-    func userLogin(loginType: LoginType) -> UserDTO? {
-        
-        if loginType == .apple {
-            return appleLoginProcess()
+    func userLogin(loginType: LoginType, completion: @escaping (Result<UserDTO, LoginError>) -> Void) {
+        if loginType == .apple
+        {
+            if let appleService = signinService as? AppleSignInCredential
+            {
+                appleService.signinWithApple()
+                
+                appleService.getAuthCredential { result in
+                    switch result {
+                    case .success(let credential):
+                        guard let userCredential = credential as? OAuthCredential else {
+                            completion(.failure(.invalidCredential))
+                            return
+                        }
+                        
+                        Auth.auth().signIn(with: userCredential) { authResult, error in
+                            if let error = error {
+                                print("Error Apple sign in: \(error.localizedDescription)")
+                                return
+                            }
+                            // 로그인에 성공했을 시 실행할 메서드 추가
+                            let user = authResult?.user
+                            let userDTO = UserDTO(uid: user?.uid ?? "", nickname: user?.displayName ?? UUID().uuidString, idToken: userCredential.idToken ?? "", loginType: "Apple", pn: user?.phoneNumber ?? "SNS", regDate: Date().toString())
+                            completion(.success(userDTO))
+                        }
+                    case .failure(let error):
+                        completion(.failure(error))
+                    }
+                }
+            }
+            else
+            {
+                signinService = AppleSignInCredential()
+                (signinService as? AppleSignInCredential)?.signinWithApple()
+                
+                (signinService as? AppleSignInCredential)?.getAuthCredential { result in
+                    switch result {
+                    case .success(let credential):
+                        guard let userCredential = credential as? OAuthCredential else {
+                            completion(.failure(.invalidCredential))
+                            return
+                        }
+                        
+                        Auth.auth().signIn(with: userCredential) { authResult, error in
+                            if let error = error {
+                                print("Error Apple sign in: \(error.localizedDescription)")
+                                return
+                            }
+                            // 로그인에 성공했을 시 실행할 메서드 추가
+                            let user = authResult?.user
+                            let userDTO = UserDTO(uid: user?.uid ?? "", nickname: user?.displayName ?? UUID().uuidString, idToken: userCredential.idToken ?? "", loginType: "Apple", pn: user?.phoneNumber ?? "SNS", regDate: Date().toString())
+                            completion(.success(userDTO))
+                        }
+                    case .failure(let error):
+                        completion(.failure(error))
+                    }
+                }
+            }
         }
         else if loginType == .google
         {
-            return googleLoginProcess()
+            if let googleService = signinService as? GoogleSignInCredential
+            {
+                googleService.signinWithGoogle()
+                googleService.getAuthCredential { result in
+                    switch result {
+                    case .success(let credential):
+                        guard let userCredential = credential else {
+                            completion(.failure(.invalidCredential))
+                            return
+                        }
+                        
+                        Auth.auth().signIn(with: userCredential) { authResult, error in
+                            if let error = error {
+                                print("Error google sign in: \(error.localizedDescription)")
+                                completion(.failure(.error(msg: error.localizedDescription)))
+                                return
+                            }
+                            
+                            
+                            // 로그인에 성공했을 시 실행할 메서드 추가
+                            let user = authResult?.user
+                            let userDTO = UserDTO(uid: user?.uid ?? "", nickname: user?.displayName ?? UUID().uuidString, idToken: authResult?.credential?.idToken ?? "", loginType: "Apple", pn: user?.phoneNumber ?? "SNS", regDate: Date().toString())
+                            completion(.success(userDTO))
+                        }
+                        
+                    case .failure(let error):
+                        completion(.failure(error))
+                        
+                    }
+                }
+            }
+            else
+            {
+                signinService = GoogleSignInCredential()
+                (signinService as? GoogleSignInCredential)?.signinWithGoogle()
+                (signinService as? GoogleSignInCredential)?.getAuthCredential { result in
+                    switch result {
+                    case .success(let credential):
+                        guard let userCredential = credential else {
+                            completion(.failure(.invalidCredential))
+                            return
+                        }
+                        
+                        Auth.auth().signIn(with: userCredential) { authResult, error in
+                            if let error = error {
+                                print("Error google sign in: \(error.localizedDescription)")
+                                completion(.failure(.error(msg: error.localizedDescription)))
+                                return
+                            }
+                            
+                            
+                            // 로그인에 성공했을 시 실행할 메서드 추가
+                            let user = authResult?.user
+                            let userDTO = UserDTO(uid: user?.uid ?? "", nickname: user?.displayName ?? UUID().uuidString, idToken: authResult?.credential?.idToken ?? "", loginType: "Apple", pn: user?.phoneNumber ?? "SNS", regDate: Date().toString())
+                            completion(.success(userDTO))
+                        }
+                        
+                    case .failure(let error):
+                        completion(.failure(error))
+                        
+                    }
+                }
+            }
         }
-        else
-        {
-            return nil
-        }
-    }
-    
-    func appleLoginProcess() -> UserDTO? {
-        let dummy = UserDTO(uid: "test", nickname: "test", idToken: "test", accessToken: "test", loginType: "test", pn: "test", regDate: "test")
-        return dummy
-    }
-    
-    func googleLoginProcess() -> UserDTO? {
-        let dummy = UserDTO(uid: "test", nickname: "test", idToken: "test", accessToken: "test", loginType: "test", pn: "test", regDate: "test")
-        return dummy
     }
 }

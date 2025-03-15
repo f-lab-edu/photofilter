@@ -11,7 +11,6 @@ struct User {
     let uid : String
     let nickname : String
     let idToken : String
-    let accessToken : String
     let loginType : String
     let pn : String
     let regDate : String
