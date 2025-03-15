@@ -21,11 +21,14 @@ struct LoginHubView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: 56)
         .background(.black, in: RoundedRectangle(cornerRadius: 8))
+        .alert("애플로그인 성공", isPresented: $viewModel.showSuccessAlert) {
+            
+        }
     }
     
     private var googleLoginButton : some View {
         Button {
-            
+            viewModel.onClickLogin(type: .google)
         } label: {
             Text("Google로 로그인하기")
                 .foregroundStyle(.black)
@@ -35,6 +38,9 @@ struct LoginHubView: View {
         .frame(maxWidth: .infinity, maxHeight: 56)
         .clipShape(RoundedRectangle(cornerRadius: 8))
         .overlay(RoundedRectangle(cornerRadius: 8).stroke(.gray, lineWidth: 1))
+        .alert("구글로그인 성공", isPresented: $viewModel.showSuccessAlert) {
+            
+        }
     }
     
     private var phoneLoginButton : some View {
@@ -77,9 +83,18 @@ struct LoginHubView: View {
             }
         }
         .padding()
+        
+        if viewModel.updateUIState == .loading
+        {
+            ProgressView()
+        }
+        else if viewModel.updateUIState == .success
+        {
+           let _ = print("로그인 성공!")
+        }
     }
 }
 
 #Preview {
-    LoginHubView(viewModel: LoginHubViewModel(userLoginUseCase: UserLoginUseCase(repository: UserLoginRepository(authManager: AuthManager()))))
+    LoginHubView(viewModel: LoginHubViewModel(userLoginUseCase: UserLoginUseCase(repository: UserLoginRepository())))
 }
