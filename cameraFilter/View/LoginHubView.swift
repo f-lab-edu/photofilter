@@ -44,16 +44,16 @@ struct LoginHubView: View {
     }
     
     private var phoneLoginButton : some View {
-        Button {
-            
+        NavigationLink {
+            PhoneLoginView(viewModel: PhoneLoginViewModel(repository: PhoneLoginRepository()))
         } label: {
             Text("핸드폰 번호로 로그인하기")
+                .frame(maxHeight: 24)
                 .foregroundStyle(.black)
                 .font(.subheadline)
                 .underline(color: .gray)
                 .bold()
         }
-        .frame(maxWidth: .infinity, maxHeight: 56)
     }
     
     @ObservedObject private var viewModel : LoginHubViewModel
@@ -64,34 +64,33 @@ struct LoginHubView: View {
     
     var body: some View {
         
-        VStack {
-            HStack {
-                Text("안녕하세요, 로그인 방법을 선택해주세요.")
-                    .font(.title)
-                    .multilineTextAlignment(.leading)
-                    .fontWeight(.bold)
-                Spacer()
-            }
-            
-            
-            Spacer()
-            
+        NavigationView {
             VStack {
-                appleLoginButton
-                googleLoginButton
-                phoneLoginButton
+                HStack {
+                    Text("안녕하세요, 로그인 방법을 선택해주세요.")
+                        .font(.title)
+                        .multilineTextAlignment(.leading)
+                        .fontWeight(.bold)
+                    Spacer()
+                }
+                
+                
+                Spacer()
+                
+                VStack {
+                    appleLoginButton
+                    googleLoginButton
+                    phoneLoginButton
+                }
+            }
+            .padding()
+            
+            if viewModel.updateUIState == .success
+            {
+               let _ = print("로그인 성공!")
             }
         }
-        .padding()
         
-        if viewModel.updateUIState == .loading
-        {
-            ProgressView()
-        }
-        else if viewModel.updateUIState == .success
-        {
-           let _ = print("로그인 성공!")
-        }
     }
 }
 
