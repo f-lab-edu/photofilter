@@ -20,7 +20,7 @@ struct PhoneLoginView : View {
     
     private var requestButton : some View {
         Button {
-            let _ = print("\(phoneNumber)")
+            viewModel.requestPhoneLogin(phoneNumber: phoneNumber)
         } label: {
             Text("인증번호 요청하기")
                 .font(.title3)
@@ -68,7 +68,25 @@ struct PhoneLoginView : View {
             
             phoneNumberField
             
-            Spacer()
+            switch viewModel.updateUIState {
+            case .success:
+                Spacer()
+            case .fail(error: let error):
+                HStack {
+                    Spacer()
+                    Text(error.localizedDescription)
+                        .hidden()
+                        .font(.subheadline)
+                        .foregroundStyle(.red)
+                        .bold()
+                        .underline()
+                }
+                Spacer()
+            case .initial:
+                Spacer()
+            case .loading:
+                Spacer()
+            }
             
             requestButton
         }
@@ -80,6 +98,8 @@ struct PhoneLoginView : View {
                 backButton
             }
         }
+        
+        
     }
 }
 
