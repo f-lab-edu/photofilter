@@ -11,7 +11,6 @@ struct UserDTO {
     let uid : String
     let nickname : String
     let idToken : String
-    let accessToken : String
     let loginType : String
     let pn : String
     let regDate : String
@@ -23,6 +22,6 @@ extension UserDTO
 {
     func toEntity() -> User
     {
-        return User(uid: uid, nickname: nickname, idToken: idToken, accessToken: accessToken, loginType: loginType, pn: pn, regDate: regDate)
+        return User(uid: uid, nickname: nickname, idToken: idToken, loginType: loginType, pn: pn, regDate: regDate)
     }
 }

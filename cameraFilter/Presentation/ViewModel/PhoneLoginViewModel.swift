@@ -27,7 +27,18 @@ class PhoneLoginViewModel : ObservableObject {
     
     func requestPhoneLogin(phoneNumber : String)
     {
-        phoneLoginRepository.requestPhoneLogin(phoneNumber: phoneNumber)
+        updateUIState = .loading
+        
+        phoneLoginRepository.requestPhoneLogin(phoneNumber: phoneNumber) { [weak self] isAuthorized, error in
+            if let error = error
+            {
+                self?.updateUIState = .fail(error: error)
+                return
+            }
+            
+            self?.updateUIState = .success
+        }
+        
     }
     
 }
