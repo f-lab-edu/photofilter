@@ -5,6 +5,7 @@
 //  Created by 정종찬 on 3/8/25.
 //
 
+import XCTest
 import Testing
 @testable import cameraFilter
 

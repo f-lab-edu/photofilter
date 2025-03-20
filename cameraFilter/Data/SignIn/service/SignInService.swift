@@ -168,3 +168,22 @@ class GoogleSignInCredential : SignInProtocol {
     }
 }
 
+class PhoneSignInCredential : SignInProtocol {
+    
+    var completion : ((Result<AuthCredential?, LoginError>) -> Void)?
+    
+    func getAuthCredential(completion: @escaping (Result<FirebaseAuth.AuthCredential?, LoginError>) -> Void) {
+        self.completion = completion
+    }
+    
+    func signinWithPhone(authNumber : String)
+    {
+        guard let verificationId = UserDefaults.standard.string(forKey: "authVerificationID") else {
+            completion?(.failure(.invalidCredential))
+            return
+        }
+        
+        let credential = PhoneAuthProvider.provider().credential(withVerificationID: verificationId, verificationCode: authNumber)
+        completion?(.success(credential))
+    }
+}
