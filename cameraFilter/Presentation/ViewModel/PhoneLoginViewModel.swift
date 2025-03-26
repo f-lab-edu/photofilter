@@ -16,7 +16,7 @@ class PhoneLoginViewModel : ObservableObject {
         case fail(error: Error)
     }
     
-    @Published var updateUIState : PhoneLoginState = .initial
+    @Published var phoneLoginState : PhoneLoginState = .initial
     
     var phoneLoginRepository : PhoneLoginRepositoryProtocol
     
@@ -27,7 +27,20 @@ class PhoneLoginViewModel : ObservableObject {
     
     func requestPhoneLogin(phoneNumber : String)
     {
-        phoneLoginRepository.requestPhoneLogin(phoneNumber: phoneNumber)
+        phoneLoginState = .loading
+        
+        phoneLoginRepository.requestPhoneLogin(phoneNumber: phoneNumber) { [weak self] isAuthorized, error in
+            DispatchQueue.main.async {
+                if let error = error
+                {
+                    self?.phoneLoginState = .fail(error: error)
+                    return
+                }
+                
+                self?.phoneLoginState = .success
+            }
+        }
+        
     }
     
 }
