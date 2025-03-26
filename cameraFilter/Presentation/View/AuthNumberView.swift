@@ -44,6 +44,12 @@ struct AuthNumberView : View {
     
     @State private var authNumber : String = ""
     
+    @StateObject private var viewModel : AuthNumberViewModel
+    
+    init(viewModel: AuthNumberViewModel) {
+        self._viewModel = StateObject(wrappedValue: viewModel)
+    }
+    
     var body: some View {
         VStack {
             HStack {
@@ -58,10 +64,13 @@ struct AuthNumberView : View {
             Spacer()
             requestAuthButton
         }
+        .onViewDidLoad {
+            
+        }
     }
 }
 
 
 #Preview {
-    AuthNumberView()
+    AuthNumberView(viewModel: AuthNumberViewModel(authNumberUsecase: AuthNumberUseCase(repository: AuthNumberRepository())))
 }

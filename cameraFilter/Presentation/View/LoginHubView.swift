@@ -12,7 +12,7 @@ struct LoginHubView: View {
     
     private var appleLoginButton : some View {
         Button {
-            viewModel.onClickLogin(type: .apple)
+            viewModel.login(type: .apple)
         } label: {
             Text("Apple로 로그인하기")
                 .foregroundStyle(.white)
@@ -21,14 +21,11 @@ struct LoginHubView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: 56)
         .background(.black, in: RoundedRectangle(cornerRadius: 8))
-        .alert("애플로그인 성공", isPresented: $viewModel.showSuccessAlert) {
-            
-        }
     }
     
     private var googleLoginButton : some View {
         Button {
-            viewModel.onClickLogin(type: .google)
+            viewModel.login(type: .google)
         } label: {
             Text("Google로 로그인하기")
                 .foregroundStyle(.black)
@@ -38,9 +35,6 @@ struct LoginHubView: View {
         .frame(maxWidth: .infinity, maxHeight: 56)
         .clipShape(RoundedRectangle(cornerRadius: 8))
         .overlay(RoundedRectangle(cornerRadius: 8).stroke(.gray, lineWidth: 1))
-        .alert("구글로그인 성공", isPresented: $viewModel.showSuccessAlert) {
-            
-        }
     }
     
     private var phoneLoginButton : some View {
@@ -56,10 +50,10 @@ struct LoginHubView: View {
         }
     }
     
-    @ObservedObject private var viewModel : LoginHubViewModel
+    @StateObject private var viewModel : LoginHubViewModel
     
-    init(viewModel: LoginHubViewModel) {
-        self.viewModel = viewModel
+    init(useCase: UserLoginUseCaseProtocol) {
+        self._viewModel = StateObject(wrappedValue: LoginHubViewModel(userLoginUseCase: useCase))
     }
     
     var body: some View {
@@ -84,8 +78,16 @@ struct LoginHubView: View {
                 }
             }
             .padding()
+            .alert("알림", isPresented: $viewModel.showSuccessAlert, actions: {
+                
+            }, message: {
+                Text("로그인 성공")
+            })
+            .onViewDidLoad {
+                viewModel.bind()
+            }
             
-            if viewModel.updateUIState == .success
+            if viewModel.loginState == .success
             {
                let _ = print("로그인 성공!")
             }
@@ -95,5 +97,5 @@ struct LoginHubView: View {
 }
 
 #Preview {
-    LoginHubView(viewModel: LoginHubViewModel(userLoginUseCase: UserLoginUseCase(repository: UserLoginRepository())))
+    LoginHubView(useCase: UserLoginUseCaseMock(repository: UserLoginRepository()))
 }

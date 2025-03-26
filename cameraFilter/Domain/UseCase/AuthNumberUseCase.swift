@@ -31,8 +31,7 @@ final class AuthNumberUseCase : AuthNumberUseCaseProtocol {
         
         repository.requestAuthenticate(authNumber: authNumber) { [weak self] result in
             switch result {
-            case .success(let userDTO):
-                let user = userDTO.toEntity()
+            case .success(let user):
                 self?.authenticateSubject.send(user)
             case .failure(let error):
                 self?.authenticateSubject.send(completion: .failure(error))

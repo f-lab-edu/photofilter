@@ -24,7 +24,10 @@ class AuthNumberViewModel : ObservableObject {
     
     init(authNumberUsecase: AuthNumberUseCaseProtocol) {
         self.authNumberUsecase = authNumberUsecase
-        
+    }
+    
+    func bind()
+    {
         authNumberUsecase.onResponseAuthenticate
             .receive(on: DispatchQueue.main)
             .sink(receiveCompletion: { [weak self] completion in

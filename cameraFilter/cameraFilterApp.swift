@@ -13,8 +13,8 @@ struct cameraFilterApp: App {
     
     var body: some Scene {
         WindowGroup {
-            let loginHubViewModel = LoginHubViewModel(userLoginUseCase: UserLoginUseCase(repository: UserLoginRepository()))
-            LoginHubView(viewModel: loginHubViewModel)
+            let userLoginUsecase = UserLoginUseCase(repository: UserLoginRepository())
+            LoginHubView(useCase: userLoginUsecase)
         }
     }
 }

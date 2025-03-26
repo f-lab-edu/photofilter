@@ -68,7 +68,7 @@ struct PhoneLoginView : View {
             
             phoneNumberField
             
-            switch viewModel.updateUIState {
+            switch viewModel.phoneLoginState {
             case .success:
                 Spacer()
             case .fail(error: let error):

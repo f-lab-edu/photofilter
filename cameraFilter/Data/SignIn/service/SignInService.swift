@@ -14,6 +14,7 @@ enum LoginError : Error {
 
 protocol SignInProtocol {
     func getAuthCredential(completion: @escaping (Result<AuthCredential?, LoginError>) -> Void)
+    func signIn()
 }
 
 //MARK: Apple Sign in
@@ -28,8 +29,7 @@ class AppleSignInCredential : NSObject, SignInProtocol {
         self.completion = completion
     }
     
-    func signinWithApple() {
-        
+    func signIn() {
         let nonce = randomNonceString()
         appleCurrentNonce = nonce
         let appleIDProvider = ASAuthorizationAppleIDProvider()
@@ -41,7 +41,6 @@ class AppleSignInCredential : NSObject, SignInProtocol {
         authorizationController.delegate = self
         authorizationController.presentationContextProvider = self
         authorizationController.performRequests()
-        
     }
     
     private func randomNonceString(length: Int = 32) -> String {
@@ -134,7 +133,7 @@ class GoogleSignInCredential : SignInProtocol {
         self.completion = completion
     }
     
-    func signinWithGoogle() {
+    func signIn() {
         guard let clientID = FirebaseApp.app()?.options.clientID else { return }
         
         // Create Google Sign In configuration object.
@@ -174,6 +173,10 @@ class PhoneSignInCredential : SignInProtocol {
     
     func getAuthCredential(completion: @escaping (Result<FirebaseAuth.AuthCredential?, LoginError>) -> Void) {
         self.completion = completion
+    }
+    
+    func signIn() {
+        
     }
     
     func signinWithPhone(authNumber : String)

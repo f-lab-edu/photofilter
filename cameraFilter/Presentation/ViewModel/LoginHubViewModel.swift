@@ -28,7 +28,7 @@ class LoginHubViewModel: ObservableObject {
     var loginType : LoginType = .notSelected
     var userLoginUsecase : UserLoginUseCaseProtocol
     
-    @Published var updateUIState : UserLoginState = .initial
+    @Published var loginState : UserLoginState = .initial
     @Published var showSuccessAlert : Bool = false
     
     private var cancellables = Set<AnyCancellable>()
@@ -37,33 +37,43 @@ class LoginHubViewModel: ObservableObject {
     {
         self.userLoginUsecase = userLoginUseCase
         
-        userLoginUseCase.onLoginStateUpdate
+    }
+    
+    func bind()
+    {
+        userLoginUsecase.onLoginStateUpdate
             .receive(on: DispatchQueue.main)
             .sink { [weak self] completion in
                 switch completion {
                 case .finished:
                     break
                 case .failure(let error):
-                    self?.updateUIState = .fail(error: .error(msg: error.localizedDescription))
+                    self?.loginState = .fail(error: .error(msg: error.localizedDescription))
                     self?.showSuccessAlert = false
                 }
             } receiveValue: { [weak self] loginState in
                 guard let usecaseLoginState = loginState else {
+                    self?.loginState = .fail(error: .invalidCredential)
+                    self?.showSuccessAlert = false
                     return
                 }
                 
                 if usecaseLoginState == .loggedIn
                 {
-                    self?.updateUIState = .success
+                    self?.loginState = .success
                     self?.showSuccessAlert = true
+                }
+                else {
+                    self?.loginState = .fail(error: .error(msg: "Login Failed!!"))
+                    self?.showSuccessAlert = false
                 }
             }
             .store(in: &cancellables)
     }
     
-    func onClickLogin(type : LoginType)
+    func login(type : LoginType)
     {
-        updateUIState = .loading
+        loginState = .loading
         
         userLoginUsecase.login(loginType: type)
     }

@@ -9,20 +9,14 @@ import Foundation
 import FirebaseAuth
 
 protocol AuthNumberRepositoryProtocol {
-    func requestAuthenticate(authNumber : String, completion : @escaping (Result<UserDTO, Error>) -> Void)
+    func requestAuthenticate(authNumber : String, completion : @escaping (Result<User, Error>) -> Void)
 }
 
 final class AuthNumberRepository : AuthNumberRepositoryProtocol {
     
-    var signinService : SignInProtocol
-    
-    init(signinService: SignInProtocol) {
-        self.signinService = signinService
-    }
-    
-    func requestAuthenticate(authNumber : String, completion : @escaping (Result<UserDTO, Error>) -> Void) {
+    func requestAuthenticate(authNumber : String, completion : @escaping (Result<User, Error>) -> Void) {
         
-        guard let service = signinService as? PhoneSignInCredential else {return}
+        let service = PhoneSignInCredential()
         
         service.signinWithPhone(authNumber: authNumber)
         
@@ -43,10 +37,11 @@ final class AuthNumberRepository : AuthNumberRepositoryProtocol {
                     // 로그인에 성공했을 시 실행할 메서드 추가
                     let user = authResult?.user
                     let userDTO = UserDTO(uid: user?.uid ?? "", nickname: user?.displayName ?? UUID().uuidString, idToken: authResult?.credential?.idToken ?? "", loginType: "Phone", pn: user?.phoneNumber ?? "Phone", regDate: Date().toString())
-                    completion(.success(userDTO))
+                    
+                    completion(.success(userDTO.toEntity()))
                 }
             case .failure(let error):
-                
+                completion(.failure(error))
             }
         }
     }
